@@ -4,7 +4,7 @@ library("tidyverse")
 
 # carga database
 ?read.table()
-
-premier <- read.table("Premier League 2011-12 Match by Match.xls", sep="\t", dec=".", quote = "\"'",
-                      header=TRUE, skip = 0, na.strings = "NA")
+premier <- (Premier_League_2011_12_Match_by_Match)
+str(premier)
+summary(premier)
 
