@@ -19,3 +19,4 @@ summary(premier)
 casa
 
 
+# escritura simultanea Nacho
