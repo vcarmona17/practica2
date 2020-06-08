@@ -19,3 +19,4 @@ summary(premier)
 
 
 
+# escritura simultanea Nacho
