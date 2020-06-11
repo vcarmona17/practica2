@@ -141,3 +141,114 @@ ggplot(duelos, aes(x =`Duels won`, y =`Aerial Duels won` )) +
 ggplot(duelos, aes(x =`Duels won`, y =`Ground Duels won` )) + 
   geom_jitter() +
   facet_grid(.~`Player Surname`)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#========================================== PARTE NACHO=========================================================#
+##-- INSTALACIÓN DE PAQUETES --##
+
+#install.packages ("tidyverse")
+#library("tidyverse")
+
+
+##-- IMPORTAR DATA FRAME DESDE EXCEL --##
+
+#library(readxl)
+#premier <- read_excel("Premier League 2011-12 Match by Match.xls")
+
+
+##-- GOLES POR JUGADOR --##
+
+Goalsby_Player <- group_by(premier,`Player Surname`)
+Goalsby_Player <- as.data.frame(summarise(Goalsby_Player,Goals=sum(Goals,na.rm=TRUE)))
+Goalsby_Player <- arrange(Goalsby_Player,desc(Goals))
+
+MaxGoleador <- top_n( Goalsby_Player, 10, Goals)
+ggplot( MaxGoleador,
+        aes( x=Goals, y= reorder(`Player Surname`, Goals),
+             fill = Goals),legend=FALSE) +
+  geom_bar( stat = "identity" ) +
+  labs(y="Player", title = "Máximos Goleadores")
+
+
+##-- TIEMPO POR JUGADOR --##
+
+Timeby_Player <- group_by(premier, `Player Surname`)
+Timeby_Player <- as.data.frame(summarise(Timeby_Player,TimePlayed=sum(`Time Played`,na.rm=TRUE)))
+Timeby_Player <- arrange(Timeby_Player,desc(TimePlayed))
+
+MaxTiempo <- top_n( Timeby_Player, 10, TimePlayed)
+ggplot( MaxTiempo,
+        aes( x=TimePlayed, y= reorder(`Player Surname`, TimePlayed),
+             fill = TimePlayed),legend=FALSE) +
+  geom_bar( stat = "identity" ) +
+  labs(x="Mins Played",y="Player", title = "Máximo Tiempo Jugado")
+
+
+##-- GOLES POR MINUTO Y JUGADOR --##
+
+Goals_Minute <- group_by(premier,`Player Surname`)
+Goals_Minute <- as.data.frame(summarise(Goals_Minute,Goals=sum(Goals,na.rm=TRUE),Time_Played=sum(`Time Played`,na.rm=TRUE)))
+Goals_Minute <- mutate(Goals_Minute, 'Goals/100min'=Goals/(Time_Played/100))
+Goals_Minute <- arrange(Goals_Minute,desc(`Goals/100min`))
+Goals_Minute <- select(Goals_Minute,-Goals,-Time_Played)
+
+MaxGolesMin <- top_n( Goals_Minute, 10,`Goals/100min`)
+ggplot( MaxGolesMin,
+        aes( x=`Goals/100min`, y= reorder(`Player Surname`, `Goals/100min`),
+             fill = `Goals/100min`),legend=FALSE) +
+  geom_bar( stat = "identity" ) +
+  labs(x="Goals by 100 min",y="Player", title = "Mejores Ratio Goles por 100 Minutos")
+
+
+##-- GOLES POR EQUIPO --#
+
+Goalsby_Team <- group_by(premier,Team)
+Goalsby_Team <- as.data.frame(summarise(Goalsby_Team,Goals=sum(Goals,na.rm=TRUE)))
+Goalsby_Team <- arrange(Goalsby_Team,desc(Goals))
+
+TeamGoleador <- top_n( Goalsby_Team, 10, Goals)
+ggplot( TeamGoleador,
+        aes( x=Goals, y= reorder(Team, Goals),
+             fill = Goals),legend=FALSE) +
+  geom_bar( stat = "identity" ) +
+  labs(y="Team", title = "Máximos Goleadores")
+
+
+##-- GOLES EN CASA/FUERA --#
+
+Goalsby_Venue <- group_by(premier,Venue)
+Goalsby_Venue <- as.data.frame(summarise(Goalsby_Venue,Goals=sum(Goals,na.rm=TRUE)))
+Goalsby_Venue <- arrange(Goalsby_Venue,desc(Goals))
+
+ggplot( Goalsby_Venue,
+        aes( x=Goals, y= Venue,
+             fill = Goals),legend=FALSE) +
+  geom_bar( stat = "identity" ) +
+  labs(y="Venue", title = "Goals by Venue")
+
+
+##-- GOLES POR EQUIPO EN CASA/FUERA --#
+
+VenuebyTeam <- premier[,c("Team","Venue","Goals")]
+
+ggplot(data = VenuebyTeam, aes(x = Team, y = Goals, fill = Venue, group = Venue)) +
+  geom_bar(data = subset(VenuebyTeam, Venue == "Home"), stat = "identity") +
+  geom_bar(data = subset(VenuebyTeam, Venue == "Away"), stat = "identity") + 
+  coord_flip() + 
+  scale_fill_manual(values=c('#25AAE2','#8BC540')) +
+  labs(x = "Teams",y = "Goals",title = "Goals by Team and Venue")+
+  scale_y_continuous(breaks = seq(0, 60, by = 5))
